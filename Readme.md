@@ -25,7 +25,7 @@ Automate the setup of a lightweight MVP environment with frontend, backend, and 
 ### **Run the Main Script**
 1. Make the scripts executable:
    ```bash
-   chmod +x main_init.sh init_mvp.sh init_version_control.sh
+   chmod +x main_init.sh init_mvp.sh init_version_control.sh init_dev_env.sh
    ```
 
 2. Run the main script:
