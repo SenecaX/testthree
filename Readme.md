@@ -207,3 +207,159 @@ The main script orchestrates the entire setup process:
 - Extend the scripts for additional features like CI/CD, deployment, or database setup.
 
 ---
+
+
+
+
+**Functional Specification of `init_mvp.sh` Script:**
+
+1. **Input Validation:**
+   - Checks if a project name is provided as an argument (`$1`).
+   - If not, prints usage information and exits.
+
+2. **Project Setup:**
+   - Creates a main project folder with the provided project name.
+   - Changes directory to the created project folder.
+
+3. **Frontend Setup:**
+   - Creates a `front` directory, initializes a Vite project with React and TypeScript template.
+   - Creates a basic `src` folder structure with subdirectories: `components`, `pages`, `features`.
+   - Overwrites `tsconfig.json` for frontend with specific configurations.
+   - Adds a basic `App.tsx` component displaying "Hello MVP!".
+
+4. **Backend Setup:**
+   - Creates a `back` directory and initializes a Node.js project.
+   - Installs necessary dependencies (`express`, `typescript`, `ts-node`, `dotenv`) and their types.
+   - Creates the `src` folder with subdirectories: `controllers`, `services`, `models`.
+   - Overwrites `tsconfig.json` with backend-specific TypeScript configurations.
+   - Adds a build script to `package.json` for TypeScript compilation.
+   - Creates a basic `app.ts` file with an Express server and a "Hello MVP!" endpoint.
+
+5. **Environment Setup:**
+   - Creates `.env` and `.env.example` files for environment variables.
+   - Configures variables like `NODE_ENV`, `PORT`, and `DB_URI`.
+   - Copies `.env` to `.env.example` and updates the example with placeholder values for `PORT` and `DB_URI`.
+
+6. **Completion Message:**
+   - Prints a completion message confirming that the MVP setup is done for the provided project name.
+
+
+
+
+
+**Functional Specification of `init_version_control.sh` Script:**
+
+1. **Input Validation:**
+   - Checks if a project name is provided as an argument (`$1`).
+   - If not, prints usage information and exits.
+
+2. **Git Initialization:**
+   - Initializes a Git repository with `git init`.
+   - If the initialization fails, it exits with an error message.
+
+3. **.gitignore Creation:**
+   - Creates a `.gitignore` file with common Node.js exclusions: `node_modules/`, `.env`, `.DS_Store`.
+
+4. **Initial Commit:**
+   - Stages and commits the initial project files with the message "Initial commit".
+   - If the commit fails, it exits with an error message.
+
+5. **GitHub Authentication:**
+   - Checks if the GitHub CLI is authenticated with `gh auth status`.
+   - If not authenticated, it prompts the user to log in using `gh auth login`.
+   - If authentication fails, it exits with an error message.
+
+6. **Remote and Repository Creation:**
+   - Checks if a remote `origin` exists.
+   - If it exists, skips remote setup.
+   - If it doesn't exist, checks if a GitHub repository for the project name already exists:
+     - If yes, links to the existing repository.
+     - If no, creates a new GitHub repository using `gh repo create`.
+
+7. **Push Initial Commit:**
+   - Renames the default branch to `main`.
+   - Pushes the initial commit to the `main` branch.
+   - If pushing fails, it exits with an error message.
+
+8. **Create and Push Additional Branches:**
+   - Creates `dev` and `staging` branches.
+   - Pushes both branches to GitHub.
+   - If pushing fails, it exits with an error message.
+
+9. **Completion Message:**
+   - Prints a message confirming that version control setup is complete for the project.
+
+
+
+
+
+
+**Functional Specification of `init_dev_env.sh` Script:**
+
+1. **Input Validation:**
+   - Checks if a project name is provided as an argument (`$1`).
+   - If not, prints usage information and exits.
+
+2. **Project Directory Check:**
+   - Verifies if the specified project directory exists.
+   - If the directory does not exist, prints an error and exits.
+
+3. **Frontend Tools Setup:**
+   - If the `front` directory exists, configures frontend tools:
+     - Installs `eslint`, `prettier`, `lint-staged`, and `husky` for linting and formatting.
+     - Initializes ESLint with an interactive setup.
+     - Creates a `.prettierrc` file for Prettier configuration.
+     - Updates `package.json` for `lint-staged` and Husky integration.
+     - Adds a pre-commit hook using Husky to run `lint-staged`.
+
+4. **Backend Tools Setup:**
+   - If the `back` directory exists, configures backend tools:
+     - Installs `nodemon` for live reloading.
+     - Installs `jest`, `@types/jest`, and `ts-jest` for testing.
+     - Initializes Jest configuration for TypeScript.
+
+5. **Shared Tools Setup:**
+   - Installs Husky in the root directory.
+   - Adds a pre-commit hook to run `lint-staged` across the project.
+
+6. **Completion Message:**
+   - Prints a message confirming the completion of the development environment setup for the project.
+
+
+
+
+
+**Functional Specification of `init_deployment.sh` Script:**
+
+1. **Input Validation:**
+   - Checks if a project name is provided as an argument (`$1`).
+   - If not, prints usage information and exits.
+
+2. **Project Directory Check:**
+   - Verifies if the specified project directory exists.
+   - If the directory does not exist, prints an error and exits.
+
+3. **Frontend Setup:**
+   - If the `front` directory exists:
+     - Updates `tsconfig.json` for the frontend with specific configurations for TypeScript.
+     - Creates a Dockerfile for the frontend with a multi-stage build:
+       - **Build Stage:** Installs dependencies and builds the application using Vite.
+       - **Serve Stage:** Installs `serve`, copies the build artifacts, and serves the static files on port 5000.
+
+4. **Backend Setup:**
+   - If the `back` directory exists:
+     - Creates a Dockerfile for the backend with a multi-stage build:
+       - **Build Stage:** Installs dependencies and compiles TypeScript.
+       - **Serve Stage:** Installs production dependencies and serves the application on port 3000.
+
+5. **Docker Compose Setup:**
+   - Creates a `docker-compose.yml` file with services for `frontend` and `backend`.
+   - Maps ports to make the frontend available on port 80 and backend on port 3000.
+
+6. **GitHub Actions CI/CD Setup:**
+   - Creates a `.github/workflows/deploy.yml` file for the CI/CD pipeline:
+     - **Push trigger**: On push to the `main` branch.
+     - **Jobs**: Includes building and pushing Docker images for frontend and backend, then deploying to a Hetzner server using SSH and Docker Compose.
+
+7. **Completion Message:**
+   - Prints a message confirming the successful setup of the deployment environment for the project.
