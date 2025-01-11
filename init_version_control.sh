@@ -48,24 +48,21 @@ if [ $? -ne 0 ]; then
   fi
 fi
 
-# Step 5: Create GitHub Repository or Verify if It Exists
-echo "Checking if GitHub repository already exists..."
-gh repo view "$PROJECT_NAME" &>/dev/null
-if [ $? -ne 0 ]; then
-  echo "Creating GitHub repository..."
-  gh repo create "$PROJECT_NAME" --public --source=. --remote=origin
-  if [ $? -ne 0 ]; then
-    echo "Error: Failed to create GitHub repository."
-    exit 1
-  fi
+# Step 5: Handle Remote and Repository Creation
+if git remote | grep -q "origin"; then
+  echo "Remote 'origin' already exists. Skipping remote setup."
 else
-  echo "GitHub repository $PROJECT_NAME already exists. Skipping creation."
-  # Check if remote origin already exists
-  if git remote | grep -q "origin"; then
-    echo "Remote 'origin' already exists. Skipping remote setup."
-  else
-    echo "Adding existing GitHub repository as remote 'origin'..."
+  echo "Checking if GitHub repository already exists..."
+  if gh repo view "$PROJECT_NAME" &>/dev/null; then
+    echo "GitHub repository $PROJECT_NAME already exists. Linking to existing repository."
     git remote add origin "https://github.com/$(gh auth status --hostname)/$PROJECT_NAME.git"
+  else
+    echo "Creating GitHub repository..."
+    gh repo create "$PROJECT_NAME" --public --source=. --remote=origin
+    if [ $? -ne 0 ]; then
+      echo "Error: Failed to create GitHub repository."
+      exit 1
+    fi
   fi
 fi
 
