@@ -52,7 +52,7 @@ else
 fi
 
 cat <<EOL > src/app.ts
-import express from 'express';
+import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -62,9 +62,13 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 
-app.get('/', (req, res) => res.send('Hello MVP!'));
+app.get('/', (req: Request, res: Response) => {
+    res.send('Hello MVP!');
+});
 
-app.listen(port, () => console.log(\`Server running on port \${port}\`));
+app.listen(port, () => {
+    console.log(\`Server running on port \${port}\`);
+});
 EOL
 cd ..
 
