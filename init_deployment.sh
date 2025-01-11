@@ -18,67 +18,114 @@ fi
 cd "$PROJECT_NAME"
 
 # Step 1: Create Dockerfiles for Frontend and Backend
-echo "Creating Dockerfiles..."
+echo "Creating Dockerfiles and updating tsconfig.json..."
 
-# Frontend Dockerfile
+# Frontend Setup
 if [ -d "front" ]; then
-  echo "FROM node:18-alpine AS build
+  echo "Updating tsconfig.json for frontend..."
+  cat <<EOL > front/tsconfig.json
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "ESNext",
+    "jsx": "react-jsx",
+    "allowImportingTsExtensions": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}
+EOL
+
+  echo "Creating Frontend Dockerfile..."
+  cat <<EOL > front/Dockerfile
+# Build Stage
+FROM node:18-alpine AS build
 WORKDIR /app
+
+# Copy package files and install dependencies
 COPY package*.json yarn.lock ./
 RUN yarn install
-COPY . .
-RUN yarn build
 
+# Copy source code and build the application using Vite
+COPY . .
+RUN yarn run vite build
+
+# Serve Stage
 FROM node:18-alpine
 WORKDIR /app
+
+# Copy build artifacts from the previous stage
 COPY --from=build /app/dist ./dist
+
+# Install the static file server
 RUN yarn global add serve
-CMD [\"serve\", \"-s\", \"dist\", \"-l\", \"5000\"]
+
+# Serve the application
+CMD ["serve", "-s", "dist", "-l", "5000"]
 EXPOSE 5000
-" > front/Dockerfile
-  echo "Frontend Dockerfile (multi-stage) created."
+EOL
+  echo "Frontend Dockerfile created."
 else
   echo "Error: Frontend directory does not exist. Skipping Frontend Dockerfile."
 fi
 
-# Backend Dockerfile
+# Backend Setup
 if [ -d "back" ]; then
-  echo "FROM node:18-alpine AS build
+  echo "Creating Backend Dockerfile..."
+  cat <<EOL > back/Dockerfile
+# Build Stage
+FROM node:18-alpine AS build
 WORKDIR /app
+
+# Copy package files and install dependencies
 COPY package*.json yarn.lock ./
 RUN yarn install
+
+# Copy source code
 COPY . .
 
+# Serve Stage
 FROM node:18-alpine
 WORKDIR /app
+
+# Copy build artifacts
 COPY --from=build /app .
-CMD [\"node\", \"dist/app.js\"]
+
+# Serve the application
+CMD ["node", "dist/app.js"]
 EXPOSE 3000
-" > back/Dockerfile
-  echo "Backend Dockerfile (multi-stage) created."
+EOL
+  echo "Backend Dockerfile created."
 else
   echo "Error: Backend directory does not exist. Skipping Backend Dockerfile."
 fi
 
 # Step 2: Create Docker Compose File
 echo "Creating docker-compose.yml..."
-echo "version: \"3.9\"
+cat <<EOL > docker-compose.yml
+version: "3.9"
 services:
   frontend:
     build: ./front
     ports:
-      - \"80:5000\"
+      - "80:5000"
   backend:
     build: ./back
     ports:
-      - \"3000:3000\"
-" > docker-compose.yml
+      - "3000:3000"
+EOL
 echo "docker-compose.yml created."
 
 # Step 3: Configure GitHub Actions Workflow
 echo "Setting up GitHub Actions workflow for CI/CD..."
 mkdir -p .github/workflows
-echo "name: CI/CD Pipeline
+cat <<EOL > .github/workflows/deploy.yml
+name: CI/CD Pipeline
 
 on:
   push:
@@ -108,7 +155,7 @@ jobs:
         run: |
           scp docker-compose.yml user@\${{ env.VM_IP }}:/home/user/$PROJECT_NAME/
           ssh user@\${{ env.VM_IP }} 'cd /home/user/$PROJECT_NAME && docker-compose up -d'
-" > .github/workflows/deploy.yml
+EOL
 echo "GitHub Actions workflow created."
 
-echo "Deployment environment setup for $PROJECT_NAME completed!"
+echo "Deployment environment setup for $PROJECT_NAME completed successfully!"
