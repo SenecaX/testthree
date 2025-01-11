@@ -20,7 +20,31 @@ mkdir front
 cd front
 yarn create vite . --template react-ts
 mkdir -p src/{components,pages,features}
-npx tsc --init
+
+# Overwrite tsconfig.json for frontend
+cat <<EOL > tsconfig.json
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "strict": true,
+    "jsx": "react",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@components/*": ["components/*"],
+      "@pages/*": ["pages/*"],
+      "@features/*": ["features/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}
+EOL
+
 cat <<EOL > src/App.tsx
 import React from 'react';
 
@@ -40,9 +64,8 @@ yarn init -y
 yarn add express typescript ts-node dotenv
 yarn add @types/express --dev
 mkdir -p src/{controllers,services,models}
-npx tsc --init
 
-# Overwrite tsconfig.json with required settings
+# Overwrite tsconfig.json with required settings for backend
 cat <<EOL > tsconfig.json
 {
   "compilerOptions": {
