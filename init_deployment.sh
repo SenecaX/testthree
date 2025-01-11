@@ -22,31 +22,40 @@ echo "Creating Dockerfiles..."
 
 # Frontend Dockerfile
 if [ -d "front" ]; then
-  echo "FROM node:16-alpine
+  echo "FROM node:16-alpine AS build
 WORKDIR /app
-COPY package*.json ./
+COPY package*.json yarn.lock ./
 RUN yarn install
 COPY . .
 RUN yarn build
-CMD [\"npx\", \"serve\", \"-s\", \"dist\", \"-l\", \"5000\"]
+
+FROM node:16-alpine
+WORKDIR /app
+COPY --from=build /app/dist ./dist
+RUN yarn global add serve
+CMD [\"serve\", \"-s\", \"dist\", \"-l\", \"5000\"]
 EXPOSE 5000
 " > front/Dockerfile
-  echo "Frontend Dockerfile created."
+  echo "Frontend Dockerfile (multi-stage) created."
 else
   echo "Error: Frontend directory does not exist. Skipping Frontend Dockerfile."
 fi
 
 # Backend Dockerfile
 if [ -d "back" ]; then
-  echo "FROM node:16-alpine
+  echo "FROM node:16-alpine AS build
 WORKDIR /app
-COPY package*.json ./
+COPY package*.json yarn.lock ./
 RUN yarn install
 COPY . .
+
+FROM node:16-alpine
+WORKDIR /app
+COPY --from=build /app .
 CMD [\"node\", \"src/app.js\"]
 EXPOSE 3000
 " > back/Dockerfile
-  echo "Backend Dockerfile created."
+  echo "Backend Dockerfile (multi-stage) created."
 else
   echo "Error: Backend directory does not exist. Skipping Backend Dockerfile."
 fi
