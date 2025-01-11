@@ -8,13 +8,27 @@ fi
 
 PROJECT_NAME=$1
 
-echo "Initializing MVP environment for $PROJECT_NAME..."
+# Step 1: Ensure 'mvp' folder exists on Desktop
+MVP_FOLDER=~/Desktop/mvp
+if [ ! -d "$MVP_FOLDER" ]; then
+  echo "Creating 'mvp' folder on Desktop..."
+  mkdir -p "$MVP_FOLDER"
+fi
 
-# Create the main project folder
+# Step 2: Change to 'mvp' directory
+cd "$MVP_FOLDER"
+
+# Step 3: Create the project directory
+if [ -d "$PROJECT_NAME" ]; then
+  echo "Error: Project '$PROJECT_NAME' already exists in $MVP_FOLDER."
+  exit 1
+fi
+
+echo "Starting the MVP initialization for project: $PROJECT_NAME"
 mkdir "$PROJECT_NAME"
 cd "$PROJECT_NAME"
 
-# Frontend setup
+# Step 4: Frontend setup
 echo "Setting up Frontend..."
 mkdir front
 cd front
@@ -56,7 +70,7 @@ export default App;
 EOL
 cd ..
 
-# Backend setup
+# Step 5: Backend setup
 echo "Setting up Backend..."
 mkdir back
 cd back
@@ -65,7 +79,7 @@ yarn add express typescript ts-node dotenv
 yarn add @types/express --dev
 mkdir -p src/{controllers,services,models}
 
-# Overwrite tsconfig.json with required settings for backend
+# Overwrite tsconfig.json for backend
 cat <<EOL > tsconfig.json
 {
   "compilerOptions": {
@@ -85,10 +99,8 @@ EOL
 
 # Add build script to package.json
 if command -v jq &>/dev/null; then
-  # Using jq if installed
   jq '.scripts.build = "tsc"' package.json > temp.json && mv temp.json package.json
 else
-  # Using node if jq is not installed
   node -e "let pkg = require('./package.json'); pkg.scripts = { ...pkg.scripts, build: 'tsc' }; require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2));"
 fi
 
@@ -113,7 +125,7 @@ app.listen(port, () => {
 EOL
 cd ..
 
-# Environment setup
+# Step 6: Environment setup
 echo "Creating .env and .env.example files..."
 cat <<EOL > .env
 NODE_ENV=development

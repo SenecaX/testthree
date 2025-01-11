@@ -2,18 +2,13 @@
   "compilerOptions": {
     "target": "ES6",
     "module": "ESNext",
-    "moduleResolution": "node",
+    "jsx": "react-jsx",
+    "allowImportingTsExtensions": true,
     "strict": true,
-    "jsx": "react",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": "./src",
-    "paths": {
-      "@components/*": ["components/*"],
-      "@pages/*": ["pages/*"],
-      "@features/*": ["features/*"]
-    }
+    "noEmit": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
