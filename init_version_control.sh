@@ -36,21 +36,27 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# Step 4: Create GitHub repository
-echo "Creating GitHub repository..."
+# Step 4: Check GitHub Authentication
+echo "Checking GitHub authentication..."
 gh auth status
 if [ $? -ne 0 ]; then
-  echo "Error: GitHub CLI is not authenticated. Run 'gh auth login' to authenticate."
-  exit 1
+  echo "GitHub CLI is not authenticated. Initiating login..."
+  gh auth login
+  if [ $? -ne 0 ]; then
+    echo "Error: Failed to authenticate with GitHub CLI."
+    exit 1
+  fi
 fi
 
+# Step 5: Create GitHub Repository
+echo "Creating GitHub repository..."
 gh repo create "$PROJECT_NAME" --public --source=. --remote=origin
 if [ $? -ne 0 ]; then
   echo "Error: Failed to create GitHub repository."
   exit 1
 fi
 
-# Step 5: Push initial commit to main branch
+# Step 6: Push initial commit to main branch
 echo "Pushing initial commit to main branch..."
 git branch -M main
 git push -u origin main
@@ -59,7 +65,7 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# Step 6: Create and push additional branches
+# Step 7: Create and push additional branches
 echo "Creating and pushing dev and staging branches..."
 git branch dev
 git branch staging
