@@ -60,6 +60,13 @@ if [ $? -ne 0 ]; then
   fi
 else
   echo "GitHub repository $PROJECT_NAME already exists. Skipping creation."
+  # Check if remote origin already exists
+  if git remote | grep -q "origin"; then
+    echo "Remote 'origin' already exists. Skipping remote setup."
+  else
+    echo "Adding existing GitHub repository as remote 'origin'..."
+    git remote add origin "https://github.com/$(gh auth status --hostname)/$PROJECT_NAME.git"
+  fi
 fi
 
 # Step 6: Push initial commit to main branch
