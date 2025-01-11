@@ -48,11 +48,14 @@ WORKDIR /app
 COPY package*.json yarn.lock ./
 RUN yarn install
 COPY . .
+RUN yarn build
 
 FROM node:16-alpine
 WORKDIR /app
-COPY --from=build /app .
-CMD [\"node\", \"src/app.js\"]
+COPY --from=build /app/dist ./dist
+COPY package*.json yarn.lock ./
+RUN yarn install --production
+CMD [\"node\", \"dist/app.js\"]
 EXPOSE 3000
 " > back/Dockerfile
   echo "Backend Dockerfile (multi-stage) created."
