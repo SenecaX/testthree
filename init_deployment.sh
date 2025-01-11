@@ -17,8 +17,7 @@ if [ ! -d "$PROJECT_NAME" ]; then
 fi
 cd "$PROJECT_NAME"
 
-# Step 1: Create Dockerfiles for Frontend and Backend
-echo "Creating Dockerfiles and updating tsconfig.json..."
+# Step 1: Create Dockerfiles and update tsconfig.json
 
 # Frontend Setup
 if [ -d "front" ]; then
@@ -89,12 +88,19 @@ RUN yarn install
 # Copy source code
 COPY . .
 
+# Compile TypeScript
+RUN yarn run tsc -b
+
 # Serve Stage
 FROM node:18-alpine
 WORKDIR /app
 
-# Copy build artifacts
-COPY --from=build /app .
+# Copy compiled build artifacts
+COPY --from=build /app/dist ./dist
+COPY package*.json yarn.lock ./
+
+# Install production dependencies
+RUN yarn install --production
 
 # Serve the application
 CMD ["node", "dist/app.js"]
