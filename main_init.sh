@@ -40,6 +40,16 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+# Run Phase 4: Deployment Readiness
+echo "======================================"
+echo "Running Phase 4: Deployment Readiness"
+echo "======================================"
+./init_deployment.sh "$PROJECT_NAME"
+if [ $? -ne 0 ]; then
+  echo "Error: Phase 4 (Deployment Readiness) failed. Exiting."
+  exit 1
+fi
+
 echo "======================================"
 echo "MVP initialization for $PROJECT_NAME completed successfully!"
 echo "======================================"
