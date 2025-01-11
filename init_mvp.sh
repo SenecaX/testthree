@@ -42,6 +42,24 @@ yarn add @types/express --dev
 mkdir -p src/{controllers,services,models}
 npx tsc --init
 
+# Overwrite tsconfig.json with required settings
+cat <<EOL > tsconfig.json
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "commonjs",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}
+EOL
+
 # Add build script to package.json
 if command -v jq &>/dev/null; then
   # Using jq if installed
