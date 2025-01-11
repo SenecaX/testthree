@@ -43,7 +43,13 @@ mkdir -p src/{controllers,services,models}
 npx tsc --init
 
 # Add build script to package.json
-sed -i '' 's/"scripts": {/"scripts": {\n    "build": "tsc",/' package.json
+if command -v jq &>/dev/null; then
+  # Using jq if installed
+  jq '.scripts.build = "tsc"' package.json > temp.json && mv temp.json package.json
+else
+  # Using node if jq is not installed
+  node -e "let pkg = require('./package.json'); pkg.scripts = { ...pkg.scripts, build: 'tsc' }; require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2));"
+fi
 
 cat <<EOL > src/app.ts
 import express from 'express';
@@ -71,7 +77,7 @@ DB_URI=mongodb://localhost:27017/$PROJECT_NAME
 EOL
 
 cp .env .env.example
-sed -i '' 's/3000/<PORT>/g' .env.example
-sed -i '' "s/mongodb:\/\/localhost:27017\/$PROJECT_NAME/<DB_URI>/g" .env.example
+sed -i '' 's/3000/<PORT>/g' .env.example || sed -i 's/3000/<PORT>/g' .env.example
+sed -i '' "s/mongodb:\/\/localhost:27017\/$PROJECT_NAME/<DB_URI>/g" .env.example || sed -i "s/mongodb:\/\/localhost:27017\/$PROJECT_NAME/<DB_URI>/g" .env.example
 
 echo "MVP setup for $PROJECT_NAME is complete!"
