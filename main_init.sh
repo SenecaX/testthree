@@ -30,6 +30,16 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+# Run Phase 3: Development Environment Standardization
+echo "========================================================"
+echo "Running Phase 3: Development Environment Standardization"
+echo "========================================================"
+./init_dev_env.sh "$PROJECT_NAME"
+if [ $? -ne 0 ]; then
+  echo "Error: Phase 3 (Development Environment Standardization) failed. Exiting."
+  exit 1
+fi
+
 echo "======================================"
 echo "MVP initialization for $PROJECT_NAME completed successfully!"
 echo "======================================"
