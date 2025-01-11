@@ -41,6 +41,10 @@ yarn add express typescript ts-node dotenv
 yarn add @types/express --dev
 mkdir -p src/{controllers,services,models}
 npx tsc --init
+
+# Add build script to package.json
+sed -i '' 's/"scripts": {/"scripts": {\n    "build": "tsc",/' package.json
+
 cat <<EOL > src/app.ts
 import express from 'express';
 import dotenv from 'dotenv';
