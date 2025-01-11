@@ -22,14 +22,14 @@ echo "Creating Dockerfiles..."
 
 # Frontend Dockerfile
 if [ -d "front" ]; then
-  echo "FROM node:16-alpine AS build
+  echo "FROM node:18-alpine AS build
 WORKDIR /app
 COPY package*.json yarn.lock ./
 RUN yarn install
 COPY . .
 RUN yarn build
 
-FROM node:16-alpine
+FROM node:18-alpine
 WORKDIR /app
 COPY --from=build /app/dist ./dist
 RUN yarn global add serve
@@ -43,18 +43,15 @@ fi
 
 # Backend Dockerfile
 if [ -d "back" ]; then
-  echo "FROM node:16-alpine AS build
+  echo "FROM node:18-alpine AS build
 WORKDIR /app
 COPY package*.json yarn.lock ./
 RUN yarn install
 COPY . .
-RUN yarn build
 
-FROM node:16-alpine
+FROM node:18-alpine
 WORKDIR /app
-COPY --from=build /app/dist ./dist
-COPY package*.json yarn.lock ./
-RUN yarn install --production
+COPY --from=build /app .
 CMD [\"node\", \"dist/app.js\"]
 EXPOSE 3000
 " > back/Dockerfile
